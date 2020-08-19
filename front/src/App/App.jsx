@@ -1,6 +1,6 @@
 import React from 'react';
 import { Router, Route, Switch, Redirect } from 'react-router-dom';
-import { ThemeProvider } from 'emotion-theming';
+import { ThemeProvider } from 'theme-ui'
 
 import { Panel } from '../domain/panel';
 import { Login } from '../domain/login';

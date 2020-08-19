@@ -1,55 +1,26 @@
-import React, { useState, useContext, useEffect } from 'react';
-import styled from '@emotion/styled';
-import { ClassNames } from '@emotion/core';
+/** @jsx jsx */
+import { useState, useEffect, useContext } from 'react';
+import { useForm } from 'react-hook-form';
+import { Button, Box, Container, Heading, Alert, Field, jsx } from 'theme-ui';
 
-import { TextInput } from '../../common/components/Form';
-import { Button } from '../../common/components/Button';
-import { Alert } from '../../common/components/Alert';
+import { Loader } from '../../common/components/Loader';
+import { InputAlert } from '../../common/components/InputAlert';
 
 import AuthContext from '../../context/auth/authContext';
 import AlertContext from '../../context/alerts/alertContext';
 
 import { history } from '../../helpers';
 
-const Container = styled.div`
-  display: flex;
-  flex-flow: column nowrap;
-  width: 100vw;
-  min-height: 100vh;
-  background-color: ${(props) => props.theme.colors.backgroundPrimary};
-`;
-
-const LoginWrapper = styled.section`
-  align-self: center;
-  margin-bottom: auto;
-  margin-top: auto;
-  padding: 1.5rem;
-  min-width: 30rem;
-  background-color: #fff;
-`;
-
-const SectionTitle = styled.h1`
-  margin-bottom: 0.1rem;
-  color: #000;
-  font-weight: 600;
-  font-size: 1.5em;
-`;
-
-const ButtonWrapper = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: flex-end;
-  margin-bottom: -1.5rem;
-  margin-right: -1.5rem;
-  margin-top: 2rem;
-`;
-
 function Login(props) {
+  const { register, handleSubmit, errors } = useForm({
+    mode: 'onSubmit',
+  });
+
   const alertContext = useContext(AlertContext);
   const { alert, showAlert, hideAlert } = alertContext;
 
   const authContext = useContext(AuthContext);
-  const { msg, authenticated, login } = authContext;
+  const { msg, authenticated, login, loading } = authContext;
 
   const [user, setUser] = useState({
     email: '',
@@ -69,50 +40,97 @@ function Login(props) {
     // eslint-disable-next-line
   }, [msg, authenticated, props.history]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
+  // Submit login form
+  const onSubmit = () => {
     hideAlert();
-
-    if (email.trim() === '' || password.trim() === '') {
-      showAlert('All fields are required', 'error');
-      return;
-    }
 
     login({ email, password });
   };
 
+  // Listening changes in the form
+  const handleChange = (e) => {
+    setUser({
+      ...user,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   return (
-    <Container>
-      <LoginWrapper>
-        <SectionTitle>Login</SectionTitle>
-        <form onSubmit={handleSubmit} noValidate>
-          <TextInput
-            type={'email'}
-            name={'email'}
-            label={'Email'}
+    <Container
+      sx={{
+        backgroundColor: 'primary',
+        height: '100vh',
+        width: '100vw',
+        background:
+          'linear-gradient(180deg, rgba(69,165,221,1) 50%, rgba(244,244,244,1) 100%)',
+      }}>
+      <Box
+        p={6}
+        sx={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          display: 'inline-flex',
+          alignItems: 'center',
+          flexFlow: 'column nowrap',
+          backgroundColor: 'background',
+          borderRadius: '0.5em',
+        }}>
+        <Heading as='h2'>CRM - Inmobiliaria Islafer</Heading>
+        <Box
+          as='form'
+          onSubmit={handleSubmit(onSubmit)}
+          sx={{
+            width: '20vw',
+            maxWidth: '30em',
+            minWidth: '20em',
+          }}>
+          <Field
+            mt={5}
+            label='Email'
+            name='email'
+            onChange={handleChange}
+            ref={register({
+              required: true,
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: 'Escribe un email válido',
+                fieldRequired: 'Este campo es obligatorio',
+              },
+            })}
           />
-          <TextInput
-            type={'password'}
-            name={'password'}
-            label={'Password'}
+          {errors.email && (
+            <InputAlert msg={errors.email.message} category='error' />
+          )}
+          <Field
+            mt={3}
+            label='Contraseña'
+            name='password'
+            type='password'
+            onChange={handleChange}
+            ref={register({
+              required: true,
+              message: 'Este campo es obligatorio',
+            })}
           />
+          {errors.password && (
+            <InputAlert msg={errors.password.message} category='error' />
+          )}
           {alert ? (
-            <Alert msg={alert.msg} category={alert.category}></Alert>
+            <Alert p={3} mt={4} variant='danger'>
+              {alert.msg}
+            </Alert>
           ) : null}
-          <ButtonWrapper>
-            <ClassNames>
-              {({ css }) => (
-                <Button
-                  wrapperClassName={css({ width: '50%' })}
-                  type={'submit'}>
-                  Login
-                </Button>
-              )}
-            </ClassNames>
-          </ButtonWrapper>
-        </form>
-      </LoginWrapper>
+          <Button
+            mt={4}
+            variant='primary'
+            type={'submit'}
+            sx={{ width: '100%' }}>
+            {loading ? <Loader /> : <span>Login</span>}
+          </Button>
+        </Box>
+      </Box>
     </Container>
   );
 }

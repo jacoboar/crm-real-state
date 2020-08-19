@@ -1,5 +1,6 @@
 import {
   GET_USER,
+  LOGIN_REQUEST,
   LOGIN_SUCCESS,
   LOGIN_FAILURE,
   LOGOUT,
@@ -7,19 +8,17 @@ import {
 
 export default (state, action) => {
   switch (action.type) {
+    case LOGIN_REQUEST:
+      return {
+        ...state,
+        loading: true
+      }
     case LOGIN_SUCCESS:
       localStorage.setItem('token', action.payload.token);
       return {
         ...state,
         authenticated: true,
         msg: null,
-        loading: false,
-      };
-    case GET_USER:
-      return {
-        ...state,
-        authenticated: true,
-        user: action.payload,
         loading: false,
       };
     case LOGOUT:
@@ -33,7 +32,13 @@ export default (state, action) => {
         msg: action.payload,
         loading: false,
       };
-
+    case GET_USER:
+      return {
+        ...state,
+        authenticated: true,
+        user: action.payload,
+        loading: false,
+      };
     default:
       return state;
   }

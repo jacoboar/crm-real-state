@@ -5,7 +5,7 @@ import AuthReducer from './authReducer';
 import { axiosClient } from '../../helpers';
 import { tokenAuth } from '../../helpers';
 
-import { GET_USER, LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT } from '../../types';
+import { GET_USER, LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT, LOGIN_REQUEST } from '../../types';
 
 function AuthState(props) {
   const initialState = {
@@ -13,7 +13,7 @@ function AuthState(props) {
     authenticated: null,
     user: null,
     msg: null,
-    loading: true,
+    loading: false
   };
 
   const [state, dispatch] = useReducer(AuthReducer, initialState);
@@ -38,6 +38,10 @@ function AuthState(props) {
   };
 
   const login = async (data) => {
+    dispatch({
+      type: LOGIN_REQUEST,
+    });
+    
     try {
       const response = await axiosClient.post('/api/auth', data);
 
